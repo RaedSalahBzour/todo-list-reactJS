@@ -1,34 +1,61 @@
 import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import Button from "@mui/material/Button";
+import Snackbar from "@mui/material/Snackbar";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTheme } from "@mui/material/styles";
 import { red, orange } from "@mui/material/colors";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { TaskContext } from "../../contexts/tasksContext";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+
 export default function Task({ id, title, isDone }) {
   const theme = useTheme();
   const { tasks, setTasks } = useContext(TaskContext);
+
   function toggleState() {
     let updatedTasks = tasks.map(task =>
       task.id === id ? { ...task, isDone: !task.isDone } : task
     );
     setTasks(updatedTasks);
   }
+
   function editTask() {
-    const newTask = prompt("New task?", title);
+    const newTask = prompt("you can edit the task now!", title);
     if (newTask && newTask.trim() !== "") {
       let updatedTasks = tasks.map(task =>
         task.id === id ? { ...task, name: newTask } : task
       );
       setTasks(updatedTasks);
+      handleClick();
     }
   }
+
   function deleteTask() {
     let updatedTasks = tasks.filter(task => task.id !== id);
     setTasks(updatedTasks);
   }
+
+  const handleClick = () => {
+    setOpen(true);
+  };
+
+  const handleClose = reason => {
+    if (reason === "clickaway") return;
+    setOpen(false);
+  };
+
+  const [open, setOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const handleOpenDeleteDialog = () => setOpenDeleteDialog(true);
+  const handleCloseDeleteDialog = () => setOpenDeleteDialog(false);
+
   return (
     <Stack
       direction="row"
@@ -53,13 +80,41 @@ export default function Task({ id, title, isDone }) {
           <CheckCircleOutlineIcon />
         </IconButton>
 
-        <IconButton sx={{ color: orange[400] }} onClick={editTask}>
-          <EditIcon />
-        </IconButton>
+        <Button onClick={editTask}>
+          <EditIcon style={{ color: orange[300] }} />
+        </Button>
+        <Snackbar
+          open={open}
+          autoHideDuration={3000}
+          onClose={handleClose}
+          message="task edited"
+        />
 
-        <IconButton sx={{ color: red[500] }} onClick={deleteTask}>
+        <IconButton sx={{ color: red[500] }} onClick={handleOpenDeleteDialog}>
           <DeleteIcon />
         </IconButton>
+        <Dialog
+          open={openDeleteDialog}
+          onClose={handleCloseDeleteDialog}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title">
+            {"Confirm Delete?"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description">
+              Are you sure you want to delete this task? This action cannot be
+              undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+            <Button onClick={deleteTask} color="error" autoFocus>
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </Stack>
   );

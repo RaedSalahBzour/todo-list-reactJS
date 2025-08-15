@@ -3,6 +3,7 @@ import { Container, Button, ButtonGroup, TextField, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Task from "../Task/Task";
 import { TaskContext } from "../../contexts/tasksContext";
+import { v4 as uuidv4 } from "uuid";
 export default function Main() {
   const theme = useTheme();
   const [tasks, setTasks] = useState([]);
@@ -10,7 +11,7 @@ export default function Main() {
 
   const addToTasks = () => {
     if (inputVal.trim() !== "") {
-      setTasks([...tasks, { id: Date.now(), name: inputVal, isDone: false }]);
+      setTasks([...tasks, { id: uuidv4(), name: inputVal, isDone: false }]);
       setInputVal("");
     }
   };
