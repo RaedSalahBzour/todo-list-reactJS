@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Container, Button, ButtonGroup, TextField, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Task from "../Task/Task";
@@ -24,12 +24,13 @@ export default function Main() {
     setInputVal("");
   };
 
-  const filteredTasks =
-    filter === "all"
+  const filteredTasks = useMemo(() => {
+    return filter === "all"
       ? tasks
       : filter === "completed"
       ? tasks.filter(task => task.isDone)
       : tasks.filter(task => !task.isDone);
+  }, [tasks, filter]);
 
   const filteredTasksList = filteredTasks.map(task => (
     <Task key={task.id} id={task.id} title={task.name} isDone={task.isDone} />
