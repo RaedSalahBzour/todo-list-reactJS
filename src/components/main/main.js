@@ -5,13 +5,20 @@ import Task from "../Task/Task";
 import { TaskContext } from "../../contexts/tasksContext";
 import { v4 as uuidv4 } from "uuid";
 export default function Main() {
+  const storedTasks = localStorage.getItem("toDoTasks");
+  const jsonTasks = JSON.parse(storedTasks);
   const theme = useTheme();
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState(jsonTasks);
   const [inputVal, setInputVal] = useState("");
 
   const addToTasks = () => {
     if (inputVal.trim() !== "") {
-      setTasks([...tasks, { id: uuidv4(), name: inputVal, isDone: false }]);
+      let newTasks = [
+        ...tasks,
+        { id: uuidv4(), name: inputVal, isDone: false },
+      ];
+      setTasks(newTasks);
+      localStorage.setItem("toDoTasks", JSON.stringify(newTasks));
       setInputVal("");
     }
   };
@@ -20,14 +27,20 @@ export default function Main() {
     <Task key={task.id} id={task.id} title={task.name} isDone={task.isDone} />
   ));
   function allTasks() {
-    setTasks(tasks);
+    const storedTasks = localStorage.getItem("toDoTasks");
+    const jsonTasks = JSON.parse(storedTasks);
+    setTasks(jsonTasks);
   }
   function done() {
-    const newTasks = tasks.filter(task => task.isDone === true);
+    const storedTasks = localStorage.getItem("toDoTasks");
+    const jsonTasks = JSON.parse(storedTasks);
+    const newTasks = jsonTasks.filter(task => task.isDone === true);
     setTasks(newTasks);
   }
   function toDo() {
-    const newTasks = tasks.filter(task => task.isDone === false);
+    const storedTasks = localStorage.getItem("toDoTasks");
+    const jsonTasks = JSON.parse(storedTasks);
+    const newTasks = jsonTasks.filter(task => task.isDone === false);
     setTasks(newTasks);
   }
   return (

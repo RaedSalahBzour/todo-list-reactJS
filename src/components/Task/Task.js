@@ -23,6 +23,7 @@ export default function Task({ id, title, isDone }) {
     let updatedTasks = tasks.map(task =>
       task.id === id ? { ...task, isDone: !task.isDone } : task
     );
+    localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
     setTasks(updatedTasks);
   }
 
@@ -33,6 +34,7 @@ export default function Task({ id, title, isDone }) {
         task.id === id ? { ...task, name: newTask } : task
       );
       setTasks(updatedTasks);
+      localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
       handleClick();
     }
   }
@@ -40,6 +42,7 @@ export default function Task({ id, title, isDone }) {
   function deleteTask() {
     let updatedTasks = tasks.filter(task => task.id !== id);
     setTasks(updatedTasks);
+    localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
   }
 
   const handleClick = () => {
