@@ -2,7 +2,6 @@ import Stack from "@mui/material/Stack";
 import IconButton from "@mui/material/IconButton";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTheme } from "@mui/material/styles";
@@ -14,15 +13,23 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { ToastContext } from "../../contexts/ToastContext";
 
 export default function Task({ id, title, isDone }) {
   const theme = useTheme();
   const { tasks, setTasks } = useContext(TaskContext);
+  const { showHideToast } = useContext(ToastContext);
 
   function toggleState() {
-    let updatedTasks = tasks.map(task =>
-      task.id === id ? { ...task, isDone: !task.isDone } : task
-    );
+    let updatedTasks = tasks.map(task => {
+      if (task.id === id) {
+        const updatedTask = { ...task, isDone: !task.isDone };
+        if (updatedTask.isDone) showHideToast("added to done list");
+        else showHideToast("removed from done list");
+        return updatedTask;
+      }
+      return task;
+    });
     localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
     setTasks(updatedTasks);
   }
@@ -35,7 +42,7 @@ export default function Task({ id, title, isDone }) {
       );
       setTasks(updatedTasks);
       localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
-      handleClick();
+      showHideToast("Task edited");
     }
   }
 
@@ -43,18 +50,9 @@ export default function Task({ id, title, isDone }) {
     let updatedTasks = tasks.filter(task => task.id !== id);
     setTasks(updatedTasks);
     localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
+    showHideToast("task deleted");
   }
 
-  const handleClick = () => {
-    setOpen(true);
-  };
-
-  const handleClose = reason => {
-    if (reason === "clickaway") return;
-    setOpen(false);
-  };
-
-  const [open, setOpen] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const handleOpenDeleteDialog = () => setOpenDeleteDialog(true);
   const handleCloseDeleteDialog = () => setOpenDeleteDialog(false);
@@ -86,12 +84,6 @@ export default function Task({ id, title, isDone }) {
         <Button onClick={editTask}>
           <EditIcon style={{ color: orange[300] }} />
         </Button>
-        <Snackbar
-          open={open}
-          autoHideDuration={3000}
-          onClose={handleClose}
-          message="task edited"
-        />
 
         <IconButton sx={{ color: red[500] }} onClick={handleOpenDeleteDialog}>
           <DeleteIcon />
