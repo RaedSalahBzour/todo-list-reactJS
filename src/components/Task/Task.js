@@ -14,11 +14,15 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { ToastContext } from "../../contexts/ToastContext";
+import EditDialog from "../dialogs/EditDialog";
 
 export default function Task({ id, title, isDone }) {
   const theme = useTheme();
   const { tasks, setTasks } = useContext(TaskContext);
   const { showHideToast } = useContext(ToastContext);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const openPopUp = () => setOpenEditDialog(true);
+  const closePopUp = () => setOpenEditDialog(false);
 
   function toggleState() {
     let updatedTasks = tasks.map(task => {
@@ -34,17 +38,14 @@ export default function Task({ id, title, isDone }) {
     setTasks(updatedTasks);
   }
 
-  function editTask() {
-    const newTask = prompt("you can edit the task now!", title);
-    if (newTask && newTask.trim() !== "") {
-      let updatedTasks = tasks.map(task =>
-        task.id === id ? { ...task, name: newTask } : task
-      );
-      setTasks(updatedTasks);
-      localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
-      showHideToast("Task edited");
-    }
-  }
+  const handleSaveEdit = newName => {
+    const updatedTasks = tasks.map(task =>
+      task.id === id ? { ...task, name: newName } : task
+    );
+    setTasks(updatedTasks);
+    localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
+    showHideToast("Task edited");
+  };
 
   function deleteTask() {
     let updatedTasks = tasks.filter(task => task.id !== id);
@@ -81,9 +82,15 @@ export default function Task({ id, title, isDone }) {
           <CheckCircleOutlineIcon />
         </IconButton>
 
-        <Button onClick={editTask}>
+        <Button onClick={openPopUp}>
           <EditIcon style={{ color: orange[300] }} />
         </Button>
+        <EditDialog
+          open={openEditDialog}
+          onClose={closePopUp}
+          task={{ id, name: title }}
+          onSave={handleSaveEdit}
+        />
 
         <IconButton sx={{ color: red[500] }} onClick={handleOpenDeleteDialog}>
           <DeleteIcon />
