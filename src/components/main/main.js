@@ -1,27 +1,17 @@
-import { useState, useContext, useEffect, useMemo, useReducer } from "react";
+import { useState, useContext, useEffect, useMemo } from "react";
 import { Container, Button, ButtonGroup, TextField, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Task from "../Task/Task";
-import { TaskContext } from "../../contexts/tasksContext";
 import { ToastContext } from "../../contexts/ToastContext";
-
-import TaskReducer from "../../reducers/TaskReducer";
-
+import { TaskContext } from "../../contexts/TaskContext";
 export default function Main() {
   const theme = useTheme();
   const [inputVal, setInputVal] = useState("");
   const [filter, setFilter] = useState("all");
-  const [tasks, dispatch] = useReducer(TaskReducer, []);
-
+  const { tasks, dispatch } = useContext(TaskContext);
   useEffect(() => {
-    const storedTasks = localStorage.getItem("toDoTasks");
-    if (storedTasks) {
-      try {
-        const parsed = JSON.parse(storedTasks);
-        dispatch({ type: "init", payload: parsed });
-      } catch {}
-    }
-  }, []);
+    dispatch({ type: "init" });
+  }, [dispatch]);
 
   const { showHideToast } = useContext(ToastContext);
 
@@ -44,54 +34,52 @@ export default function Main() {
   ));
 
   return (
-    <TaskContext.Provider value={{ tasks, dispatch }}>
-      <Container
-        maxWidth="lg"
-        style={{
-          backgroundColor: theme.palette.secondary.main,
-          borderRadius: "20px",
-          marginTop: "20%",
-          textAlign: "center",
-        }}
+    <Container
+      maxWidth="lg"
+      style={{
+        backgroundColor: theme.palette.secondary.main,
+        borderRadius: "20px",
+        marginTop: "20%",
+        textAlign: "center",
+      }}
+    >
+      <h1>To Do</h1>
+
+      <ButtonGroup
+        variant="contained"
+        aria-label="Basic button group"
+        style={{ margin: "10px" }}
       >
-        <h1>To Do</h1>
+        <Button onClick={() => setFilter("all")}>All</Button>
+        <Button onClick={() => setFilter("completed")}>Done</Button>
+        <Button onClick={() => setFilter("toDo")}>To Do</Button>
+      </ButtonGroup>
 
-        <ButtonGroup
+      {filteredTasks.length > 0 ? filteredTasksList : <h2>No tasks</h2>}
+
+      <Box
+        component="form"
+        sx={{ p: 1, display: "flex", justifyContent: "space-between" }}
+        noValidate
+        autoComplete="off"
+      >
+        <TextField
+          value={inputVal}
+          onChange={e => setInputVal(e.target.value)}
+          id="outlined-basic"
+          label="New task"
+          variant="outlined"
+          size="small"
+        />
+        <Button
+          disabled={!inputVal}
           variant="contained"
-          aria-label="Basic button group"
-          style={{ margin: "10px" }}
+          size="small"
+          onClick={addToTasks}
         >
-          <Button onClick={() => setFilter("all")}>All</Button>
-          <Button onClick={() => setFilter("completed")}>Done</Button>
-          <Button onClick={() => setFilter("toDo")}>To Do</Button>
-        </ButtonGroup>
-
-        {filteredTasks.length > 0 ? filteredTasksList : <h2>No tasks</h2>}
-
-        <Box
-          component="form"
-          sx={{ p: 1, display: "flex", justifyContent: "space-between" }}
-          noValidate
-          autoComplete="off"
-        >
-          <TextField
-            value={inputVal}
-            onChange={e => setInputVal(e.target.value)}
-            id="outlined-basic"
-            label="New task"
-            variant="outlined"
-            size="small"
-          />
-          <Button
-            disabled={!inputVal}
-            variant="contained"
-            size="small"
-            onClick={addToTasks}
-          >
-            Add
-          </Button>
-        </Box>
-      </Container>
-    </TaskContext.Provider>
+          Add
+        </Button>
+      </Box>
+    </Container>
   );
 }

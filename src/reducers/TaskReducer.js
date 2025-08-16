@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 export default function TaskReducer(currentTasks, action) {
   switch (action.type) {
     case "init": {
-      return action.payload;
+      return JSON.parse(localStorage.getItem("toDoTasks") || []);
     }
     case "add": {
       let newTasks = [

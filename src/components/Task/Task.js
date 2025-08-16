@@ -13,8 +13,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { ToastContext } from "../../contexts/ToastContext";
+import { TaskContext } from "../../contexts/TaskContext";
 import EditDialog from "../dialogs/EditDialog";
-import { TaskContext } from "../../contexts/tasksContext";
 
 export default function Task({ id, title, isDone }) {
   const theme = useTheme();

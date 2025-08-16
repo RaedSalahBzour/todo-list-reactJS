@@ -3,6 +3,7 @@ import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Container from "@mui/material/Container";
 import Main from "./components/main/main";
 import { ToastProvider } from "./contexts/ToastContext";
+import TaskProvider from "./contexts/TaskContext";
 export default function App() {
   let theme = createTheme({
     palette: {
@@ -17,11 +18,13 @@ export default function App() {
 
   return (
     <ThemeProvider theme={theme}>
-      <ToastProvider>
-        <Container maxWidth="xs">
-          <Main />
-        </Container>
-      </ToastProvider>
+      <TaskProvider>
+        <ToastProvider>
+          <Container maxWidth="xs">
+            <Main />
+          </Container>
+        </ToastProvider>
+      </TaskProvider>
     </ThemeProvider>
   );
 }
