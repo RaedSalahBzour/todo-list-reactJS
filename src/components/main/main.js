@@ -1,32 +1,32 @@
-import { useState, useContext, useEffect, useMemo } from "react";
+import { useState, useContext, useEffect, useMemo, useReducer } from "react";
 import { Container, Button, ButtonGroup, TextField, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Task from "../Task/Task";
 import { TaskContext } from "../../contexts/tasksContext";
 import { ToastContext } from "../../contexts/ToastContext";
-import { v4 as uuidv4 } from "uuid";
+
+import TaskReducer from "../../reducers/TaskReducer";
+
 export default function Main() {
   const theme = useTheme();
-  const [tasks, setTasks] = useState([]);
   const [inputVal, setInputVal] = useState("");
   const [filter, setFilter] = useState("all");
+  const [tasks, dispatch] = useReducer(TaskReducer, []);
 
   useEffect(() => {
     const storedTasks = localStorage.getItem("toDoTasks");
     if (storedTasks) {
       try {
         const parsed = JSON.parse(storedTasks);
-        setTasks(Array.isArray(parsed) ? parsed.filter(t => t && t.id) : []);
-      } catch {
-        setTasks([]);
-      }
+        dispatch({ type: "init", payload: parsed });
+      } catch {}
     }
   }, []);
+
   const { showHideToast } = useContext(ToastContext);
+
   const addToTasks = () => {
-    let newTasks = [...tasks, { id: uuidv4(), name: inputVal, isDone: false }];
-    setTasks(newTasks);
-    localStorage.setItem("toDoTasks", JSON.stringify(newTasks));
+    dispatch({ type: "add", payload: { title: inputVal } });
     setInputVal("");
     showHideToast("Task added");
   };
@@ -44,7 +44,7 @@ export default function Main() {
   ));
 
   return (
-    <TaskContext.Provider value={{ tasks, setTasks }}>
+    <TaskContext.Provider value={{ tasks, dispatch }}>
       <Container
         maxWidth="lg"
         style={{

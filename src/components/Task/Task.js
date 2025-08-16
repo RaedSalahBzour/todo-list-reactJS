@@ -5,9 +5,8 @@ import Button from "@mui/material/Button";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useTheme } from "@mui/material/styles";
-import { red, orange } from "@mui/material/colors";
+import { orange } from "@mui/material/colors";
 import { useContext, useState } from "react";
-import { TaskContext } from "../../contexts/tasksContext";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -15,48 +14,34 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { ToastContext } from "../../contexts/ToastContext";
 import EditDialog from "../dialogs/EditDialog";
+import { TaskContext } from "../../contexts/tasksContext";
 
 export default function Task({ id, title, isDone }) {
   const theme = useTheme();
-  const { tasks, setTasks } = useContext(TaskContext);
   const { showHideToast } = useContext(ToastContext);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const { dispatch } = useContext(TaskContext);
+
   const openPopUp = () => setOpenEditDialog(true);
   const closePopUp = () => setOpenEditDialog(false);
-
-  function toggleState() {
-    let updatedTasks = tasks.map(task => {
-      if (task.id === id) {
-        const updatedTask = { ...task, isDone: !task.isDone };
-        if (updatedTask.isDone) showHideToast("added to done list");
-        else showHideToast("removed from done list");
-        return updatedTask;
-      }
-      return task;
-    });
-    localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
-    setTasks(updatedTasks);
-  }
-
-  const handleSaveEdit = newName => {
-    const updatedTasks = tasks.map(task =>
-      task.id === id ? { ...task, name: newName } : task
-    );
-    setTasks(updatedTasks);
-    localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
-    showHideToast("Task edited");
-  };
-
-  function deleteTask() {
-    let updatedTasks = tasks.filter(task => task.id !== id);
-    setTasks(updatedTasks);
-    localStorage.setItem("toDoTasks", JSON.stringify(updatedTasks));
-    showHideToast("task deleted");
-  }
-
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const handleOpenDeleteDialog = () => setOpenDeleteDialog(true);
   const handleCloseDeleteDialog = () => setOpenDeleteDialog(false);
+
+  function toggleState() {
+    dispatch({ type: "toggle", payload: { id: id } });
+    showHideToast(isDone ? "removed from done list" : "added to done list");
+  }
+
+  function handleSaveEdit(newName) {
+    dispatch({ type: "edit", payload: { id: id, name: newName } });
+    showHideToast("Task edited");
+  }
+
+  function deleteTask() {
+    dispatch({ type: "delete", payload: { id: id } });
+    showHideToast("task deleted");
+  }
 
   return (
     <Stack
@@ -92,7 +77,7 @@ export default function Task({ id, title, isDone }) {
           onSave={handleSaveEdit}
         />
 
-        <IconButton sx={{ color: red[500] }} onClick={handleOpenDeleteDialog}>
+        <IconButton color="error" onClick={handleOpenDeleteDialog}>
           <DeleteIcon />
         </IconButton>
         <Dialog

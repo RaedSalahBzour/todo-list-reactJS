@@ -19,7 +19,7 @@ export default function EditDialog({ open, onClose, task, onSave }) {
       onClose();
     }
   };
-
+  if (!open) return null;
   return (
     <Dialog fullWidth open={open} onClose={() => onClose()}>
       <DialogTitle>Edit Task</DialogTitle>
